@@ -1,4 +1,9 @@
-from fastapi import APIRouter
+from pathlib import Path
+
+from fastapi import APIRouter, File, UploadFile
+
+from app.ai.speech.transcription import transcribe_audio
+
 
 router = APIRouter(
     prefix="/lectures",
@@ -6,39 +11,20 @@ router = APIRouter(
 )
 
 
-@router.post("/start")
-async def start_lecture():
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+
+@router.post("/upload")
+async def upload_lecture(file: UploadFile = File(...)):
+    file_path = UPLOAD_DIR / file.filename
+
+    with open(file_path, "wb") as buffer:
+        buffer.write(await file.read())
+
+    transcript = transcribe_audio(str(file_path))
+
     return {
-        "message": "Lecture started"
-    }
-
-
-@router.post("/{lecture_id}/stop")
-async def stop_lecture(lecture_id: int):
-    return {
-        "message": "Lecture stopped",
-        "lecture_id": lecture_id,
-    }
-
-
-@router.get("/")
-async def get_lectures():
-    return {
-        "message": "Get lectures"
-    }
-
-
-@router.get("/{lecture_id}")
-async def get_lecture(lecture_id: int):
-    return {
-        "message": "Get lecture",
-        "lecture_id": lecture_id,
-    }
-
-
-@router.delete("/{lecture_id}")
-async def delete_lecture(lecture_id: int):
-    return {
-        "message": "Delete lecture",
-        "lecture_id": lecture_id,
+        "filename": file.filename,
+        "transcript": transcript,
     }
