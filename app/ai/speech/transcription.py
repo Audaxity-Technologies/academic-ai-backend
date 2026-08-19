@@ -10,8 +10,8 @@ model = WhisperModel(
 )
 
 
-def transcribe_audio(file_path: str) -> str:
-    segments, _ = model.transcribe(
+def transcribe_audio(file_path: str) -> dict:
+    segments, info = model.transcribe(
         file_path,
         beam_size=5,
     )
@@ -21,4 +21,7 @@ def transcribe_audio(file_path: str) -> str:
         for segment in segments
     )
 
-    return transcript
+    return {
+        "language": info.language,
+        "transcript": transcript,
+    }

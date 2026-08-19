@@ -1,24 +1,31 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyo
 
-# Virtual environments
+# Virtual environment
 .venv/
 venv/
-env/
-ENV/
 
-# Environment variables / secrets
+# Environment variables
 .env
 .env.*
-!.env.example
 
-# IDE / editors
+# Uploaded files
+uploads/*
+!uploads/.gitkeep
+
+# Audio files
+*.mp3
+*.wav
+*.mpeg
+*.m4a
+
+# IDE
 .vscode/
 .idea/
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
@@ -27,25 +34,5 @@ Thumbs.db
 .coverage
 htmlcov/
 
-# Type checking / linting
-.mypy_cache/
-.ruff_cache/
-
-# Build / packaging
-build/
-dist/
-*.egg-info/
-
 # Logs
 *.log
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Temporary files
-*.tmp
-*.temp
-
-# Generated audio / media
-app/static/audio/*
-!app/static/audio/.gitkeep
