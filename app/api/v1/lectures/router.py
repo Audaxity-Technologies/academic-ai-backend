@@ -22,9 +22,10 @@ async def upload_lecture(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
 
-    transcript = transcribe_audio(str(file_path))
+    result = transcribe_audio(str(file_path))
 
     return {
         "filename": file.filename,
-        "transcript": transcript,
+        "language": result["language"],
+        "transcript": result["transcript"],
     }
