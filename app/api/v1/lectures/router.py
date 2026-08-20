@@ -2,8 +2,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, File, UploadFile
 
-from app.ai.speech.transcription import transcribe_audio
-
+from app.ai.pipeline.lecture_pipeline import process_lecture
 
 router = APIRouter(
     prefix="/lectures",
@@ -22,10 +21,9 @@ async def upload_lecture(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
 
-    result = transcribe_audio(str(file_path))
+    result = process_lecture(str(file_path))
 
     return {
-        "filename": file.filename,
-        "language": result["language"],
-        "transcript": result["transcript"],
+    "filename": file.filename,
+    **result,
     }
