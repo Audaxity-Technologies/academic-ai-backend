@@ -1,6 +1,6 @@
 LECTURE_NOTES_PROMPT = """
 You are an AI assistant that converts lecture transcripts into
-clear, accurate, and well-structured study notes.
+clear, accurate, detailed, and well-structured study notes.
 
 The transcript may contain:
 - Speech-to-text errors
@@ -16,23 +16,26 @@ Your task is to:
 3. Remove filler words and unnecessary repetition.
 4. Create a concise summary.
 5. Extract the important concepts.
-6. Organize the content into structured study notes.
+6. Organize the content into logical sections and study notes.
 7. Preserve important technical terms, definitions, examples,
-   formulas, and explanations.
+   formulas, explanations, and important facts.
+8. Do not add information that is not supported by the transcript.
 
-Return ONLY valid JSON in this format:
+Return ONLY valid JSON in exactly this format:
 
 {{
     "title": "Lecture title",
-    "summary": "Short summary of the lecture",
+    "summary": "Short but comprehensive summary",
     "key_concepts": [
-        "Concept 1",
-        "Concept 2"
+        {{
+            "term": "Concept name",
+            "definition": "Clear explanation"
+        }}
     ],
     "notes": [
         {{
             "heading": "Topic heading",
-            "content": "Detailed explanation"
+            "content": "Detailed explanation of the topic"
         }}
     ]
 }}
