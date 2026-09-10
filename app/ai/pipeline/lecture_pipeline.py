@@ -18,7 +18,7 @@ def process_lecture(file_path: str) -> dict:
         chunk_notes = generate_notes(chunk)
 
         all_notes.append(chunk_notes)
-###
+
     return {
         "transcript": transcript,
         "language": transcription_result.get("language"),
