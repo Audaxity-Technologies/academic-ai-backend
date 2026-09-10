@@ -5,8 +5,8 @@ MODEL_SIZE = "base"
 
 model = WhisperModel(
     MODEL_SIZE,
-    device="cuda",
-    compute_type="float16",
+    device="cpu",
+    compute_type="int8",
 )
 
 
