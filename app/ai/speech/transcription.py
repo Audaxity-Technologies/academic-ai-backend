@@ -8,8 +8,6 @@ model = WhisperModel(
     device="cpu",
     compute_type="int8",
 )
-
-
 def transcribe_audio(file_path: str) -> dict:
     segments, info = model.transcribe(
         file_path,
