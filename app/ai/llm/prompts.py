@@ -23,24 +23,24 @@ Your task is to:
 
 Return ONLY valid JSON in exactly this format:
 
-{{
+{
     "title": "Lecture title",
     "summary": "Short but comprehensive summary",
     "key_concepts": [
-        {{
+        {
             "term": "Concept name",
             "definition": "Clear explanation"
-        }}
+        }
     ],
     "notes": [
-        {{
+        {
             "heading": "Topic heading",
             "content": "Detailed explanation of the topic"
-        }}
+        }
     ]
-}}
+}
 
 Lecture transcript:
 
-{transcript}
+<<<TRANSCRIPT>>>
 """

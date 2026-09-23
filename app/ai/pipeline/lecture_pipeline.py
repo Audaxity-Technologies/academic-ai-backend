@@ -1,4 +1,6 @@
 from pathlib import Path
+import json
+from datetime import datetime
 
 from app.ai.speech.transcription import transcribe_audio
 from app.ai.llm.notes import generate_notes
@@ -10,13 +12,33 @@ from app.ai.export.pdf_generator import generate_pdf
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
+DEBUG_DIR = Path("debug_outputs")
+DEBUG_DIR.mkdir(exist_ok=True)
+
 
 def process_lecture(file_path: str) -> dict:
+    # Create timestamped debug folder
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    session_dir = DEBUG_DIR / f"{Path(file_path).stem}_{timestamp}"
+    session_dir.mkdir(exist_ok=True)
+    
+    print(f"[DEBUG] Session folder: {session_dir}")
+    
     transcription_result = transcribe_audio(file_path)
 
     transcript = transcription_result["transcript"]
+    
+    # Save full transcript
+    transcript_path = session_dir / "01_full_transcript.txt"
+    transcript_path.write_text(transcript, encoding="utf-8")
+    print(f"[DEBUG] Saved transcript to {transcript_path}")
 
     chunks = chunk_transcript(transcript)
+    
+    # Save chunks
+    chunks_path = session_dir / "02_chunks.json"
+    chunks_path.write_text(json.dumps(chunks, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[DEBUG] Saved {len(chunks)} chunks to {chunks_path}")
 
     all_notes = []
 
@@ -24,12 +46,22 @@ def process_lecture(file_path: str) -> dict:
         print(f"Processing chunk {index + 1}/{len(chunks)}")
 
         chunk_notes = generate_notes(chunk)
+        
+        # Save individual chunk notes
+        chunk_notes_path = session_dir / f"03_chunk_{index + 1}_notes.json"
+        chunk_notes_path.write_text(json.dumps(chunk_notes, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"[DEBUG] Saved chunk {index + 1} notes to {chunk_notes_path}")
 
         all_notes.append(chunk_notes)
 
     print("Merging chunk notes...")
 
     final_notes = merge_notes(all_notes)
+    
+    # Save final merged notes
+    final_notes_path = session_dir / "04_final_notes.json"
+    final_notes_path.write_text(json.dumps(final_notes, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[DEBUG] Saved final notes to {final_notes_path}")
 
     # Generate PDF
     pdf_name = f"{Path(file_path).stem}_notes.pdf"
@@ -48,4 +80,5 @@ def process_lecture(file_path: str) -> dict:
         "chunks": len(chunks),
         "notes": final_notes,
         "pdf": str(pdf_path),
+        "debug_folder": str(session_dir),
     }

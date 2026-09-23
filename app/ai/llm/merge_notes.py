@@ -1,18 +1,6 @@
-import os
 import json
-import time
 
-from dotenv import load_dotenv
-from google import genai
-from google.genai import types
-
-
-load_dotenv()
-
-
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
+from app.ai.llm.llm_client import llm_client
 
 
 MERGE_NOTES_PROMPT = """
@@ -32,7 +20,7 @@ Rules:
 
 Return ONLY valid JSON in exactly this format:
 
-{{
+{
     "title": "Lecture title",
     "summary": "Overall lecture summary",
     "key_concepts": [
@@ -40,18 +28,17 @@ Return ONLY valid JSON in exactly this format:
         "Concept 2"
     ],
     "notes": [
-        {{
+        {
             "heading": "Topic heading",
             "content": "Detailed explanation"
-        }}
+        }
     ]
-}}
+}
 
 Chunk notes:
 
-{chunk_notes}
+<<<CHUNK_NOTES>>>
 """
-
 
 def merge_notes(chunk_notes: list[dict]) -> dict:
 
@@ -61,32 +48,13 @@ def merge_notes(chunk_notes: list[dict]) -> dict:
         indent=2
     )
 
-    prompt = MERGE_NOTES_PROMPT.format(
-        chunk_notes=chunk_notes_text
+    prompt = MERGE_NOTES_PROMPT.replace("<<<CHUNK_NOTES>>>", chunk_notes_text)
+
+    result = llm_client.generate_content(
+        prompt=prompt,
+        response_mime_type="application/json",
+        max_retries=3,
+        base_delay=2.0
     )
 
-    max_retries = 3
-
-    for attempt in range(max_retries):
-        try:
-
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                ),
-            )
-
-            return json.loads(response.text)
-
-        except Exception as e:
-
-            print(
-                f"Gemini merge attempt {attempt + 1} failed: {e}"
-            )
-
-            if attempt == max_retries - 1:
-                raise
-
-            time.sleep(5)
+    return result
