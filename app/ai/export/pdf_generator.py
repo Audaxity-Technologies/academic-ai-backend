@@ -66,60 +66,101 @@ def generate_pdf(notes: dict, output_path: str) -> str:
     story = []
 
     # Title
-    story.append(
-        Paragraph(
-            notes.get("title", "Lecture Notes"),
-            title_style,
-        )
-    )
-
+    title = notes.get("title", "Lecture Notes")
+    story.append(Paragraph(title, title_style))
     story.append(Spacer(1, 5 * mm))
 
     # Summary
-    story.append(
-        Paragraph("Summary", section_style)
-    )
+    summary = notes.get("summary", "")
+    if summary:
+        story.append(Paragraph("Summary", section_style))
+        story.append(Paragraph(summary, body_style))
+        story.append(Spacer(1, 3 * mm))
 
-    story.append(
-        Paragraph(
-            notes.get("summary", ""),
-            body_style,
-        )
-    )
+    # Learning Objectives
+    learning_objectives = notes.get("learning_objectives", [])
+    if learning_objectives:
+        story.append(Paragraph("Learning Objectives", section_style))
+        for obj in learning_objectives:
+            story.append(Paragraph(f"• {obj}", body_style))
+        story.append(Spacer(1, 3 * mm))
 
-    # Key concepts
-    story.append(
-        Paragraph("Key Concepts", section_style)
-    )
+    # Sections
+    sections = notes.get("sections", [])
+    if sections:
+        story.append(Paragraph("Lecture Sections", section_style))
+        for section in sections:
+            heading = section.get("heading", "")
+            explanation = section.get("explanation", "")
+            
+            if heading:
+                story.append(Paragraph(heading, heading_style))
+            if explanation:
+                story.append(Paragraph(explanation, body_style))
+            
+            # Examples
+            examples = section.get("examples", [])
+            if examples:
+                story.append(Paragraph("Examples", heading_style))
+                for example in examples:
+                    description = example.get("description", "")
+                    illustration = example.get("illustration", "")
+                    if description:
+                        story.append(Paragraph(f"<b>{description}</b>", body_style))
+                    if illustration:
+                        story.append(Paragraph(illustration, body_style))
+            
+            # Definitions
+            definitions = section.get("definitions", [])
+            if definitions:
+                story.append(Paragraph("Definitions", heading_style))
+                for definition in definitions:
+                    term = definition.get("term", "")
+                    definition_text = definition.get("definition", "")
+                    if term:
+                        story.append(Paragraph(f"<b>{term}</b>: {definition_text}", body_style))
+            
+            # Formulas
+            formulas = section.get("formulas", [])
+            if formulas:
+                story.append(Paragraph("Formulas", heading_style))
+                for formula in formulas:
+                    story.append(Paragraph(f"<i>{formula}</i>", body_style))
+            
+            # Instructor Emphasis
+            instructor_emphasis = section.get("instructor_emphasis", [])
+            if instructor_emphasis:
+                story.append(Paragraph("Instructor Emphasis", heading_style))
+                for emphasis in instructor_emphasis:
+                    story.append(Paragraph(f"• {emphasis}", body_style))
+            
+            # Common Misconceptions
+            common_misconceptions = section.get("common_misconceptions", [])
+            if common_misconceptions:
+                story.append(Paragraph("Common Misconceptions", heading_style))
+                for misconception in common_misconceptions:
+                    story.append(Paragraph(f"• {misconception}", body_style))
+            
+            story.append(Spacer(1, 2 * mm))
 
-    for concept in notes.get("key_concepts", []):
-        story.append(
-            Paragraph(
-                f"• {concept}",
-                body_style,
-            )
-        )
+    # Questions & Answers
+    qa = notes.get("questions_and_answers", [])
+    if qa:
+        story.append(Paragraph("Questions & Answers", section_style))
+        for item in qa:
+            question = item.get("question", "")
+            answer = item.get("answer", "")
+            if question:
+                story.append(Paragraph(f"<b>Q:</b> {question}", body_style))
+            if answer:
+                story.append(Paragraph(f"<b>A:</b> {answer}", body_style))
+            story.append(Spacer(1, 1 * mm))
 
-    # Notes
-    story.append(
-        Paragraph("Lecture Notes", section_style)
-    )
-
-    for note in notes.get("notes", []):
-
-        story.append(
-            Paragraph(
-                note.get("heading", ""),
-                heading_style,
-            )
-        )
-
-        story.append(
-            Paragraph(
-                note.get("content", ""),
-                body_style,
-            )
-        )
+    # Revision Summary
+    revision_summary = notes.get("revision_summary", "")
+    if revision_summary:
+        story.append(Paragraph("Revision Summary", section_style))
+        story.append(Paragraph(revision_summary, body_style))
 
     doc.build(story)
 

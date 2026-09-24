@@ -3,8 +3,7 @@ import json
 from datetime import datetime
 
 from app.ai.speech.transcription import transcribe_audio
-from app.ai.llm.notes import generate_notes
-from app.ai.llm.merge_notes import merge_notes
+from app.ai.llm.notes import generate_notes_from_transcript
 from app.ai.pipeline.chunking import chunk_transcript
 from app.ai.export.pdf_generator import generate_pdf
 
@@ -40,25 +39,10 @@ def process_lecture(file_path: str) -> dict:
     chunks_path.write_text(json.dumps(chunks, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[DEBUG] Saved {len(chunks)} chunks to {chunks_path}")
 
-    all_notes = []
-
-    for index, chunk in enumerate(chunks):
-        print(f"Processing chunk {index + 1}/{len(chunks)}")
-
-        chunk_notes = generate_notes(chunk)
-        
-        # Save individual chunk notes
-        chunk_notes_path = session_dir / f"03_chunk_{index + 1}_notes.json"
-        chunk_notes_path.write_text(json.dumps(chunk_notes, ensure_ascii=False, indent=2), encoding="utf-8")
-        print(f"[DEBUG] Saved chunk {index + 1} notes to {chunk_notes_path}")
-
-        all_notes.append(chunk_notes)
-
-    print("Merging chunk notes...")
-
-    final_notes = merge_notes(all_notes)
+    # Generate notes using the new chunk-aware function
+    final_notes = generate_notes_from_transcript(transcript, chunks)
     
-    # Save final merged notes
+    # Save final notes
     final_notes_path = session_dir / "04_final_notes.json"
     final_notes_path.write_text(json.dumps(final_notes, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[DEBUG] Saved final notes to {final_notes_path}")

@@ -14,7 +14,7 @@ Provider = Literal["groq", "gemini", "ollama"]
 
 
 class LLMClient:
-    def __init__(self, primary_provider: Provider = "groq", fallback_provider: Provider = None):
+    def __init__(self, primary_provider: Provider = "gemini", fallback_provider: Provider = "groq"):
         self.primary_provider = primary_provider
         self.fallback_provider = fallback_provider
         
@@ -24,13 +24,16 @@ class LLMClient:
         # Initialize Gemini client
         self.gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
         
-        # Initialize Ollama client
+        # Initialize Ollama client (kept for potential local use, but not in default provider chain)
+        # Ollama/qwen3:8b is too weak for teaching-quality notes generation - it produces
+        # overly compressed summaries and struggles with the expanded schema requirements.
+        # The code path is preserved for future use with stronger local models if needed.
         self.ollama_client = OllamaClient(host='http://localhost:11434')
         
         # Model configurations
         self.models = {
-            "groq": "llama-3.1-8b-instant",
-            "gemini": "gemini-2.0-flash-exp",
+            "groq": "openai/gpt-oss-120b",
+            "gemini": "gemini-2.5-flash",
             "ollama": "qwen3:8b"
         }
 
@@ -126,4 +129,4 @@ class LLMClient:
 
 
 # Global client instance
-llm_client = LLMClient(primary_provider="ollama", fallback_provider=None)
+llm_client = LLMClient(primary_provider="gemini", fallback_provider="groq")
