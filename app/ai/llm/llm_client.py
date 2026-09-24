@@ -33,7 +33,7 @@ class LLMClient:
         # Model configurations
         self.models = {
             "groq": "openai/gpt-oss-120b",
-            "gemini": "gemini-2.5-flash",
+            "gemini": "gemini-3.8-flash",
             "ollama": "qwen3:8b"
         }
 
