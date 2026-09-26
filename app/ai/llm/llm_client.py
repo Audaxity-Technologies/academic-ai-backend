@@ -14,9 +14,9 @@ Provider = Literal["groq", "gemini", "ollama"]
 
 
 class LLMClient:
-    def __init__(self, primary_provider: Provider = "gemini", fallback_provider: Provider = "groq"):
+    def __init__(self, primary_provider: Provider = "gemini", fallback_providers: list[Provider] = None):
         self.primary_provider = primary_provider
-        self.fallback_provider = fallback_provider
+        self.fallback_providers = fallback_providers or ["groq", "ollama"]
         
         # Initialize Groq client
         self.groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -24,10 +24,7 @@ class LLMClient:
         # Initialize Gemini client
         self.gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
         
-        # Initialize Ollama client (kept for potential local use, but not in default provider chain)
-        # Ollama/qwen3:8b is too weak for teaching-quality notes generation - it produces
-        # overly compressed summaries and struggles with the expanded schema requirements.
-        # The code path is preserved for future use with stronger local models if needed.
+        # Initialize Ollama client
         self.ollama_client = OllamaClient(host='http://localhost:11434')
         
         # Model configurations
@@ -48,11 +45,8 @@ class LLMClient:
         Generate content using primary provider with fallback to secondary.
         Implements exponential backoff for retries.
         """
-        print(f"[LLMClient] Starting generation with providers: {[self.primary_provider, self.fallback_provider if self.fallback_provider else 'None']}")
-        
-        providers = [self.primary_provider]
-        if self.fallback_provider:
-            providers.append(self.fallback_provider)
+        providers = [self.primary_provider] + self.fallback_providers
+        print(f"[LLMClient] Starting generation with providers: {providers}")
         
         for provider in providers:
             model_name = self.models[provider]
@@ -129,4 +123,4 @@ class LLMClient:
 
 
 # Global client instance
-llm_client = LLMClient(primary_provider="gemini", fallback_provider="groq")
+llm_client = LLMClient(primary_provider="gemini", fallback_providers=["groq", "ollama"])
