@@ -6,7 +6,7 @@ from app.ai.speech.transcription import transcribe_audio
 from app.ai.llm.notes import generate_notes_from_transcript
 from app.ai.pipeline.chunking import chunk_transcript
 from app.ai.export.pdf_generator import generate_pdf
-
+from app.ai.export.html_renderer import render_html
 
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -58,11 +58,23 @@ def process_lecture(file_path: str) -> dict:
 
     print(f"PDF generated: {pdf_path}")
 
+    # Generate HTML
+    html_name = f"{Path(file_path).stem}_notes.html"
+    html_path = OUTPUT_DIR / html_name
+
+    render_html(
+        final_notes,
+        str(html_path)
+    )
+
+    print(f"HTML generated: {html_path}")
+
     return {
         "transcript": transcript,
         "language": transcription_result.get("language"),
         "chunks": len(chunks),
         "notes": final_notes,
         "pdf": str(pdf_path),
+        "html": str(html_path),
         "debug_folder": str(session_dir),
     }

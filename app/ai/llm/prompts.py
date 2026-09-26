@@ -30,6 +30,20 @@ CRITICAL INSTRUCTIONS:
 
 9. Do not add information that is not supported by the transcript.
 
+For flowchart diagrams, use this exact edge-labeling syntax for branches:
+    B{Decision text} -->|Condition A| C[Result A]
+    B -->|Condition B| D[Result B]
+Never write bare node names like "Yes-->X" as if they were standalone nodes.
+
+For mindmap diagrams, use pure indentation hierarchy with NO arrows:
+    mindmap
+      root((Topic))
+        Branch1
+          Leaf1
+          Leaf2
+        Branch2
+
+        
 Return ONLY valid JSON in exactly this format:
 
 {
