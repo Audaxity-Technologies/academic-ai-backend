@@ -325,8 +325,20 @@ def render_html(notes: Dict, output_path: str) -> str:
     </div>
     
     <script>
-        // Initialize Mermaid
-        mermaid.initialize({{ startOnLoad: true, theme: 'default' }});
+        // Initialize Mermaid and setup event listeners after DOM is ready
+        document.addEventListener("DOMContentLoaded", function() {{
+            // Initialize Mermaid
+            mermaid.initialize({{ startOnLoad: false, theme: 'default' }});
+            
+            // Re-render mermaid diagrams when details are opened
+            document.querySelectorAll('details').forEach(d => {{
+                d.addEventListener('toggle', () => {{
+                    if (d.open) {{
+                        mermaid.run({{ nodes: d.querySelectorAll('.mermaid') }});
+                    }}
+                }});
+            }});
+        }});
         
         // Render KaTeX
         document.addEventListener("DOMContentLoaded", function() {{
