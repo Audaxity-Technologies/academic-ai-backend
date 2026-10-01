@@ -37,5 +37,10 @@ htmlcov/
 # Logs
 *.log
 
-outputs/
-debug_outputs/
+# Generated AI outputs
+outputs/*
+!outputs/.gitkeep
+
+# AI pipeline debug artifacts
+debug_outputs/*
+!debug_outputs/.gitkeep
