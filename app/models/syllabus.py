@@ -1,18 +1,15 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, String, func
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-
-from app.core.constants import UserRole
 from app.database.base import Base
 
 
-
-class User(Base):
-    __tablename__ = "users"
+class SyllabusTopic(Base):
+    __tablename__ = "syllabus_topics"
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -20,35 +17,28 @@ class User(Base):
         default=uuid.uuid4,
     )
 
-    email: Mapped[str] = mapped_column(
-        String(255),
-        unique=True,
+    course_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("courses.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
 
-    password_hash: Mapped[str] = mapped_column(
+    title: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
     )
 
-    full_name: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
+    description: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
     )
 
-    role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole, name="user_role"),
+    position: Mapped[int] = mapped_column(
+        Integer,
         nullable=False,
-        default=UserRole.STUDENT,
     )
-
-    is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=True,
-    )
-
+    
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -61,7 +51,8 @@ class User(Base):
         onupdate=func.now(),
         nullable=False,
     )
-    courses = relationship(
+
+    course = relationship(
         "Course",
-        back_populates="teacher",
+        back_populates="syllabus_topics",
     )
