@@ -10,6 +10,10 @@ app = FastAPI(
 
 app.include_router(api_router)
 
+from app.middleware.cors import setup_cors
+
+setup_cors(app)
+
 
 @app.get("/")
 async def root():

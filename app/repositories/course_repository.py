@@ -32,7 +32,15 @@ class CourseRepository:
         )
         return list(self.db.scalars(stmt).all())
 
+    def get_all(self) -> list[Course]:
+        stmt = select(Course).order_by(Course.created_at.desc())
+        return list(self.db.scalars(stmt).all())
+
     def update(self, course: Course) -> Course:
         self.db.flush()
         self.db.refresh(course)
         return course
+
+    def delete(self, course: Course) -> None:
+        self.db.delete(course)
+        self.db.flush()

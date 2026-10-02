@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str
 
+    CORS_ORIGINS: list[str] = ["*"]
+
     # Authentication
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
