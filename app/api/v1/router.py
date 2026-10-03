@@ -9,7 +9,7 @@ from app.api.v1.faculty.router import router as faculty_router
 from app.api.v1.students.router import router as students_router
 from app.api.v1.lectures.router import router as lectures_router
 from app.api.v1.notes.router import router as notes_router
-
+from app.api.v1.auth.router import router as auth_router
 from app.api.v1.search.router import router as search_router
 from app.api.v1.analytics.router import router as analytics_router
 from app.api.v1.notifications.router import router as notifications_router
@@ -30,3 +30,4 @@ api_router.include_router(notes_router)
 api_router.include_router(search_router)
 api_router.include_router(analytics_router)
 api_router.include_router(notifications_router)
+api_router.include_router(auth_router)
