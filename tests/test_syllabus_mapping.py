@@ -5,51 +5,44 @@ syllabus_topics = [
     "ER Model",
     "Relational Model",
     "SQL",
-    "Normalization",
     "Transactions",
+    "ACID Properties",
     "Serializability",
     "Indexing",
     "Query Optimization"
 ]
-
-
 lecture_notes = {
-    "title": "Normalization and Functional Dependencies",
+    "title": "Introduction to Transactions",
 
     "summary": (
-        "The lecture explains functional dependencies, "
-        "candidate keys, and database normalization."
+        "The lecture introduces database transactions and explains "
+        "atomicity and consistency. The instructor briefly mentions "
+        "that indexing will be discussed in a future lecture."
     ),
 
     "key_concepts": [
-        "Functional dependencies",
-        "Candidate keys",
-        "1NF",
-        "2NF",
-        "3NF",
-        "BCNF"
+        "Transactions",
+        "Atomicity",
+        "Consistency"
     ],
 
     "notes": [
         {
-            "heading": "Functional Dependencies",
+            "heading": "Transactions",
             "content": (
-                "Functional dependencies describe relationships "
-                "between attributes in a relation."
+                "A transaction is a logical unit of database work. "
+                "The lecture introduces the concept of transactions "
+                "and discusses atomicity and consistency."
             )
         },
         {
-            "heading": "Normalization",
+            "heading": "Upcoming Topics",
             "content": (
-                "The lecture explains first normal form, "
-                "second normal form, third normal form, "
-                "and Boyce-Codd Normal Form."
+                "Indexing will be discussed in a future lecture."
             )
         }
     ]
 }
-
-
 result = map_syllabus(
     syllabus_topics,
     lecture_notes
