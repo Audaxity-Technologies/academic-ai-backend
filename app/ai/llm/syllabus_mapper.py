@@ -11,24 +11,105 @@ client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
 )
 
-
 SYLLABUS_MAPPING_PROMPT = """
-You are an academic curriculum mapping assistant.
+You are an academic syllabus coverage evaluator.
 
-Your task is to determine which syllabus topics were actually
-covered in a lecture based on the lecture notes.
+Your task is to determine which syllabus topics were ACTUALLY TAUGHT
+in a lecture based ONLY on the provided lecture notes.
+
+The goal is NOT to find general academic relationships between topics.
+
+For EVERY syllabus topic, answer this question:
+
+"Did this lecture actually teach this specific syllabus topic?"
 
 IMPORTANT RULES:
 
-1. Every syllabus topic must appear exactly once.
-2. Do not assume a topic was taught merely because it was mentioned.
-3. "covered" means the lecture substantially teaches the topic.
-4. "partially_covered" means only part of the topic was taught.
-5. "mentioned" means the topic was referenced but not meaningfully taught.
-6. "not_covered" means there is insufficient evidence that the topic was taught.
-7. Do not invent information.
-8. Evidence must come only from the lecture notes.
-9. Confidence must be between 0 and 1.
+1. Evaluate EVERY syllabus topic exactly once.
+
+2. Use ONLY the provided lecture notes as evidence.
+
+3. Do NOT use general academic knowledge to infer that a topic was taught.
+
+4. Do NOT mark a syllabus topic as covered simply because it is
+   related to another concept that was taught.
+
+5. A prerequisite, sub-concept, or related concept does NOT automatically
+   mean that the parent syllabus topic was covered.
+
+6. A topic is "covered" ONLY when the lecture contains substantial
+   teaching of that specific topic, such as:
+   - explanation
+   - definition
+   - procedure
+   - derivation
+   - worked example
+   - detailed discussion
+   - application
+
+7. A topic is "partially_covered" when a meaningful portion of that
+   specific syllabus topic was taught, but the topic was not substantially
+   completed.
+
+8. A topic is "mentioned" when the topic is explicitly referenced or
+   named, but there is not enough teaching to consider it covered.
+
+9. A topic is "not_covered" when there is no meaningful evidence that
+   the specific topic was taught.
+
+10. Do NOT confuse related concepts with the syllabus topic itself.
+
+    Example:
+
+    Syllabus topic:
+    "Relational Model"
+
+    Lecture concepts:
+    "Functional Dependencies"
+    "Candidate Keys"
+    "Normalization"
+
+    These concepts may be related to databases, but they are NOT enough
+    evidence to say that "Relational Model" was taught.
+
+    Therefore:
+    "Relational Model" → "not_covered"
+
+11. Do NOT infer coverage from the lecture title alone unless the lecture
+    content also provides meaningful evidence.
+
+12. Do NOT infer coverage from a single keyword appearing in the notes.
+
+13. Do NOT invent evidence.
+
+14. Evidence must come directly from the lecture notes. Evidence should
+    briefly explain WHY the specific syllabus topic received its status.
+
+15. If there is no evidence for a topic, return an empty evidence list.
+
+16. Confidence represents how confident you are that the STATUS is correct.
+    It does NOT represent how much of the topic was covered.
+
+17. Return EVERY syllabus topic exactly once.
+
+18. Return ONLY valid JSON. Do not include markdown, explanations,
+    comments, or additional fields.
+
+STATUS DEFINITIONS:
+
+"covered"
+→ The specific syllabus topic was substantially taught.
+
+"partially_covered"
+→ A meaningful part of the specific syllabus topic was taught,
+  but the topic was not fully covered.
+
+"mentioned"
+→ The topic was explicitly mentioned or referenced, but not meaningfully
+  taught.
+
+"not_covered"
+→ There is insufficient evidence that the specific topic was taught.
 
 SYLLABUS TOPICS:
 {syllabus}
@@ -36,7 +117,7 @@ SYLLABUS TOPICS:
 LECTURE NOTES:
 {lecture_notes}
 
-Return ONLY valid JSON in exactly this format:
+Return exactly this JSON structure:
 
 {{
     "mappings": [
@@ -45,7 +126,7 @@ Return ONLY valid JSON in exactly this format:
             "status": "covered",
             "confidence": 0.95,
             "evidence": [
-                "Evidence from the lecture notes"
+                "Specific evidence from the lecture notes"
             ]
         }}
     ]
