@@ -50,5 +50,11 @@ result = map_syllabus(
 
 
 print("\n===== SYLLABUS MAPPING RESULT =====\n")
+from app.ai.pipeline.syllabus_mapping import calculate_coverage
+coverage = calculate_coverage(
+    result["mappings"]
+)
 
+print("\n===== SYLLABUS COVERAGE =====")
+print(f"{coverage}%")
 print(result)
