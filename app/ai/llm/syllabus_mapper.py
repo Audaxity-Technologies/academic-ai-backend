@@ -4,7 +4,7 @@ import json
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-
+from app.ai.llm.syllabus_mapper_schema import SyllabusMappingResult
 load_dotenv()
 
 client = genai.Client(
@@ -133,7 +133,6 @@ Return exactly this JSON structure:
 }}
 """
 
-
 def map_syllabus(
     syllabus_topics: list[str],
     lecture_notes: dict
@@ -158,4 +157,10 @@ def map_syllabus(
         )
     )
 
-    return json.loads(response.text)
+    raw_result = json.loads(response.text)
+
+    validated_result = SyllabusMappingResult.model_validate(
+        raw_result
+    )
+
+    return validated_result.model_dump()
