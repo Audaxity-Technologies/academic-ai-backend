@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.note import Note
+from app.models.lecture import Lecture
 from app.core.constants import NoteStatus
 
 
@@ -24,6 +25,15 @@ class NoteRepository:
     def get_by_lecture(self, lecture_id: UUID) -> Note | None:
         stmt = select(Note).where(Note.lecture_id == lecture_id)
         return self.db.scalar(stmt)
+
+    def get_by_course(self, course_id: UUID) -> list[Note]:
+        stmt = (
+            select(Note)
+            .join(Lecture, Note.lecture_id == Lecture.id)
+            .where(Lecture.course_id == course_id)
+            .order_by(Note.created_at.desc())
+        )
+        return list(self.db.scalars(stmt).all())
 
     def get_by_status(
         self,
