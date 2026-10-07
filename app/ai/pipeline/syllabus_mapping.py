@@ -1,11 +1,14 @@
+from app.ai.llm.syllabus_mapper import map_syllabus
+
+
 def calculate_coverage(mappings: list[dict]) -> float:
     """
     Calculate syllabus coverage from topic mappings.
 
-    covered          = 1.0
+    covered           = 1.0
     partially_covered = 0.5
-    mentioned        = 0.0
-    not_covered      = 0.0
+    mentioned         = 0.0
+    not_covered       = 0.0
     """
 
     if not mappings:
@@ -25,3 +28,28 @@ def calculate_coverage(mappings: list[dict]) -> float:
     coverage = (score / len(mappings)) * 100
 
     return round(coverage, 2)
+
+
+def process_syllabus_mapping(
+    syllabus_topics: list[str],
+    lecture_notes: dict
+) -> dict:
+    """
+    Map lecture notes against syllabus topics
+    and calculate lecture-level syllabus coverage.
+    """
+
+    mapping_result = map_syllabus(
+        syllabus_topics=syllabus_topics,
+        lecture_notes=lecture_notes
+    )
+
+    coverage = calculate_coverage(
+        mapping_result["mappings"]
+    )
+
+
+    return {
+        "mappings": mapping_result["mappings"],
+        "coverage_percentage": coverage
+    }
