@@ -5,6 +5,7 @@ from app.models.syllabus import SyllabusTopic
 from app.models.lecture import Lecture
 from app.models.transcript import Transcript
 from app.models.note import Note
+from app.models.syllabus_mapping import SyllabusMapping
 
 __all__ = [
     "User",
@@ -13,4 +14,5 @@ __all__ = [
     "Lecture",
     "Transcript",
     "Note",
+    "SyllabusMapping",
 ]
