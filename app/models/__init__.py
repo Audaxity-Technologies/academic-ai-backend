@@ -13,4 +13,6 @@ __all__ = [
     "Lecture",
     "Transcript",
     "Note",
+    "RAGChunk",
 ]
+from app.models.rag_chunk import RAGChunk
