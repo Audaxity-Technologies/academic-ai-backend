@@ -1,5 +1,4 @@
-from app.ai.llm.syllabus_mapper import map_syllabus
-
+from app.ai.pipeline.syllabus_mapping import process_syllabus_mapping
 
 syllabus_topics = [
     "ER Model",
@@ -16,45 +15,65 @@ lecture_notes = {
 
     "summary": (
         "The lecture introduces database transactions and explains "
-        "atomicity and consistency. The instructor briefly mentions "
-        "that indexing will be discussed in a future lecture."
+        "atomicity and consistency."
     ),
 
-    "key_concepts": [
-        "Transactions",
-        "Atomicity",
-        "Consistency"
+    "learning_objectives": [
+        "Understand the concept of a database transaction",
+        "Understand atomicity and consistency"
     ],
 
-    "notes": [
+    "sections": [
         {
             "heading": "Transactions",
-            "content": (
+            "explanation": (
                 "A transaction is a logical unit of database work. "
-                "The lecture introduces the concept of transactions "
+                "The lecture explains the purpose of transactions "
                 "and discusses atomicity and consistency."
-            )
-        },
-        {
-            "heading": "Upcoming Topics",
-            "content": (
-                "Indexing will be discussed in a future lecture."
-            )
+            ),
+            "examples": [
+                {
+                    "description": "Transaction example",
+                    "illustration": (
+                        "A transaction performs a sequence of database "
+                        "operations as one logical unit."
+                    )
+                }
+            ],
+            "definitions": [
+                {
+                    "term": "Transaction",
+                    "definition": (
+                        "A transaction is a logical unit of database work."
+                    )
+                }
+            ],
+            "formulas": [],
+            "diagram": {
+                "type": "none",
+                "mermaid_code": None
+            },
+            "instructor_emphasis": [
+                "Transactions should be treated as logical units of work."
+            ],
+            "common_misconceptions": []
         }
-    ]
-}
-result = map_syllabus(
-    syllabus_topics,
-    lecture_notes
-)
+    ],
 
+    "questions_and_answers": [],
+
+    "revision_summary": (
+        "A transaction is a logical unit of database work. "
+        "The lecture discusses atomicity and consistency."
+    )
+}
+result = process_syllabus_mapping(
+    syllabus_topics=syllabus_topics,
+    lecture_notes=lecture_notes
+)
 
 print("\n===== SYLLABUS MAPPING RESULT =====\n")
-from app.ai.pipeline.syllabus_mapping import calculate_coverage
-coverage = calculate_coverage(
-    result["mappings"]
-)
+print(result)
 
 print("\n===== SYLLABUS COVERAGE =====")
-print(f"{coverage}%")
-print(result)
+print(f"{result['coverage_percentage']}%")
