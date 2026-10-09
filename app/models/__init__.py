@@ -14,11 +14,5 @@ __all__ = [
     "Lecture",
     "Transcript",
     "Note",
-<<<<<<< HEAD
-    "RAGChunk",
-]
-from app.models.rag_chunk import RAGChunk
-=======
     "SyllabusMapping",
 ]
->>>>>>> 2db1e054230453e075a5019cf72be09842179f00
