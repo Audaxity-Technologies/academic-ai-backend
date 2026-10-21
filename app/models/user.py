@@ -65,3 +65,8 @@ class User(Base):
         "Course",
         back_populates="teacher",
     )
+    enrolled_courses = relationship(
+        "Course",
+        secondary="course_students",
+        back_populates="students",
+    )

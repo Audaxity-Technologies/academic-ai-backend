@@ -1,11 +1,40 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, func
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    String,
+    Table,
+    Text,
+    func,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
+
+
+course_students = Table(
+    "course_students",
+    Base.metadata,
+    Column(
+        "course_id",
+        UUID(as_uuid=True),
+        ForeignKey("courses.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "student_id",
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+)
+Index("ix_course_students_student_id", course_students.c.student_id)
 
 
 class Course(Base):
@@ -63,6 +92,11 @@ class Course(Base):
     teacher = relationship(
         "User",
         back_populates="courses",
+    )
+    students = relationship(
+        "User",
+        secondary=course_students,
+        back_populates="enrolled_courses",
     )
     syllabus_topics = relationship(
         "SyllabusTopic",

@@ -78,6 +78,17 @@ def index_course(
 
     embeddings = embed_documents(texts)
 
+    if len(embeddings) != len(all_chunks):
+        raise RuntimeError(
+            "Embedding model returned a different number of vectors "
+            "than input chunks."
+        )
+
+    if any(len(embedding) != 384 for embedding in embeddings):
+        raise RuntimeError(
+            "Embedding model must return 384-dimensional vectors."
+        )
+
     for chunk, embedding in zip(
         all_chunks,
         embeddings,

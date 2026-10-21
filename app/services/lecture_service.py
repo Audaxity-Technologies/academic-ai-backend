@@ -2,12 +2,15 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from app.ai.pipeline.syllabus_mapping import process_syllabus_mapping
 from app.core.constants import LectureSourceType, LectureStatus, NoteStatus
 from app.models.lecture import Lecture
 from app.models.note import Note
 from app.models.transcript import Transcript
 from app.repositories.lecture_repository import LectureRepository
 from app.repositories.note_repository import NoteRepository
+from app.repositories.syllabus_mapping_repository import SyllabusMappingRepository
+from app.repositories.syllabus_repository import SyllabusRepository
 from app.repositories.transcript_repository import TranscriptRepository
 
 
@@ -95,3 +98,46 @@ class LectureService:
 
     def get_course_lectures(self, course_id: UUID) -> list[Lecture]:
         return self.lecture_repository.get_by_course(course_id)
+
+    def map_syllabus(
+        self,
+        lecture: Lecture,
+        note_content: dict,
+    ) -> dict:
+        """
+        Map lecture notes to syllabus topics and save mappings.
+        Returns the mapping result with coverage percentage.
+        """
+        syllabus_repo = SyllabusRepository(self.db)
+        mapping_repo = SyllabusMappingRepository(self.db)
+
+        # Get all syllabus topics for the course
+        topics = syllabus_repo.get_by_course(lecture.course_id)
+
+        if not topics:
+            return {
+                "mappings": [],
+                "coverage_percentage": 0.0,
+                "message": "No syllabus topics defined for this course"
+            }
+
+        # Extract topic names for mapping
+        topic_names = [topic.title for topic in topics]
+        topic_records = {topic.title: topic.id for topic in topics}
+
+        # Run AI mapping
+        mapping_result = process_syllabus_mapping(
+            syllabus_topics=topic_names,
+            lecture_notes=note_content
+        )
+
+        # Save mappings to database
+        mapping_repo.save_mappings(
+            lecture_id=lecture.id,
+            topic_records=topic_records,
+            mappings=mapping_result["mappings"]
+        )
+
+        self.db.commit()
+
+        return mapping_result

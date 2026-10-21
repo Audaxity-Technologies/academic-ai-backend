@@ -1,12 +1,18 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
 from app.database.dependencies.auth import get_current_user
 from app.database.dependencies.database import get_db
 from app.models.user import User
-from app.schemas.course import CourseCreate, CourseResponse, CourseUpdate
+from app.schemas.course import (
+    CourseCreate,
+    CourseResponse,
+    CourseStudentEnrollment,
+    CourseUpdate,
+)
+from app.schemas.user import UserResponse
 from app.services.course_service import CourseService
 
 from app.schemas.syllabus import (
@@ -66,10 +72,7 @@ def get_course(
 ):
     service = CourseService(db)
 
-    return service.get_course(
-        course_id=course_id,
-        teacher=current_user,
-    )
+    return service.get_course_for_user(course_id=course_id, user=current_user)
 
 
 @router.put(
@@ -106,6 +109,53 @@ def delete_course(
         course_id=course_id,
         teacher=current_user,
     )
+
+
+@router.post(
+    "/{course_id}/students",
+    response_model=UserResponse,
+)
+def enroll_student(
+    course_id: UUID,
+    request: CourseStudentEnrollment,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return CourseService(db).enroll_student(
+        course_id=course_id,
+        student_email=str(request.email),
+        teacher=current_user,
+    )
+
+
+@router.get(
+    "/{course_id}/students",
+    response_model=list[UserResponse],
+)
+def list_course_students(
+    course_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return CourseService(db).list_students(course_id, current_user)
+
+
+@router.delete(
+    "/{course_id}/students/{student_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def unenroll_student(
+    course_id: UUID,
+    student_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    CourseService(db).unenroll_student(
+        course_id=course_id,
+        student_id=student_id,
+        teacher=current_user,
+    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @router.post(
     "/{course_id}/syllabus",

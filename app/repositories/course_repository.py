@@ -32,6 +32,21 @@ class CourseRepository:
         )
         return list(self.db.scalars(stmt).all())
 
+    def get_by_student(self, student_id: UUID) -> list[Course]:
+        stmt = (
+            select(Course)
+            .where(Course.students.any(id=student_id))
+            .order_by(Course.created_at.desc())
+        )
+        return list(self.db.scalars(stmt).all())
+
+    def is_student_enrolled(self, course_id: UUID, student_id: UUID) -> bool:
+        stmt = select(Course.id).where(
+            Course.id == course_id,
+            Course.students.any(id=student_id),
+        )
+        return self.db.scalar(stmt) is not None
+
     def get_all(self) -> list[Course]:
         stmt = select(Course).order_by(Course.created_at.desc())
         return list(self.db.scalars(stmt).all())

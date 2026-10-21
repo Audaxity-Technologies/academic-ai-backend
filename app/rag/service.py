@@ -1,3 +1,4 @@
+import math
 from sqlalchemy.orm import Session
 
 from app.ai.llm.llm_client import llm_client
@@ -24,11 +25,11 @@ Rules:
 
 Return JSON with exactly:
 
-{
+{{
   "answer": "string",
   "confidence": 0.0,
   "sources": [1, 2]
-}
+}}
 
 Student question:
 {question}
@@ -119,10 +120,19 @@ Type: {chunk.source_type}
         response_mime_type="application/json",
     )
 
-    used_sources = result.get(
-        "sources",
-        list(range(1, len(ranked) + 1)),
+    raw_used_sources = result.get(
+        "sources", list(range(1, len(ranked) + 1))
     )
+    if not isinstance(raw_used_sources, list):
+        raw_used_sources = []
+
+    used_sources = {
+        source_id
+        for source_id in raw_used_sources
+        if isinstance(source_id, int)
+        and not isinstance(source_id, bool)
+        and 1 <= source_id <= len(ranked)
+    }
 
     selected_sources = [
         source
@@ -130,13 +140,22 @@ Type: {chunk.source_type}
         if source["id"] in used_sources
     ]
 
+    answer = result.get("answer")
+    if not isinstance(answer, str) or not answer.strip():
+        answer = (
+            "I could not generate an answer from the available course material."
+        )
+
+    try:
+        confidence = float(result.get("confidence", 0.0))
+    except (TypeError, ValueError):
+        confidence = 0.0
+    if not math.isfinite(confidence):
+        confidence = 0.0
+    confidence = min(max(confidence, 0.0), 1.0)
+
     return {
-        "answer": result.get(
-            "answer",
-            "I could not generate an answer.",
-        ),
-        "confidence": float(
-            result.get("confidence", 0.0)
-        ),
+        "answer": answer,
+        "confidence": confidence,
         "sources": selected_sources,
     }

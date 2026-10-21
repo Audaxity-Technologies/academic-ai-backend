@@ -1,15 +1,6 @@
-import os
 import json
-
-from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+from app.ai.llm.llm_client import llm_client
 from app.ai.llm.syllabus_mapper_schema import SyllabusMappingResult
-load_dotenv()
-
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
 
 SYLLABUS_MAPPING_PROMPT = """
 You are an academic syllabus coverage evaluator.
@@ -149,15 +140,10 @@ def map_syllabus(
         )
     )
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json"
-        )
+    raw_result = llm_client.generate_content(
+        prompt=prompt,
+        response_mime_type="application/json",
     )
-
-    raw_result = json.loads(response.text)
 
     validated_result = SyllabusMappingResult.model_validate(
         raw_result

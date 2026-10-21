@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class CourseCreate(BaseModel):
@@ -15,6 +15,10 @@ class CourseUpdate(BaseModel):
     code: str | None = None
     description: str | None = None
     is_active: bool | None = None
+
+
+class CourseStudentEnrollment(BaseModel):
+    email: EmailStr
 
 
 class CourseResponse(BaseModel):
