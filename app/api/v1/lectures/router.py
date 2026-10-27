@@ -3,7 +3,7 @@ from pathlib import Path
 from uuid import UUID
 from datetime import datetime
 import json
-
+import uuid
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
@@ -129,9 +129,11 @@ async def upload_lecture(
     5. Map notes against course syllabus
     6. Save mapping results and complete lecture
     """
-    safe_filename = Path(file.filename or "lecture_audio").name
-    file_path = UPLOAD_DIR / safe_filename
+    original_filename = Path(file.filename or "lecture_audio").name
+    extension = Path(original_filename).suffix.lower() or ".webm"
 
+    unique_filename = f"{uuid.uuid4().hex}{extension}"
+    file_path = UPLOAD_DIR / unique_filename
     lecture_service = LectureService(db)
     lecture = None
 
