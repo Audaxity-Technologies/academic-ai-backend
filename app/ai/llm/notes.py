@@ -46,8 +46,9 @@ def generate_notes_from_transcript(transcript: str, chunks: list[str]) -> dict:
             chunk_notes.append(notes)
         except Exception as e:
             print(f"[NOTES] Failed to generate notes for chunk {i+1}: {e}")
-            # Continue with other chunks even if one fails
-            chunk_notes.append({})
-    
+            raise RuntimeError(
+                f"Notes generation failed for chunk {i+1}/{len(chunks)}. "
+                "Aborting to prevent incomplete lecture notes."
+            ) from e
     print(f"[NOTES] Merging {len(chunk_notes)} chunk notes")
     return merge_notes(chunk_notes)
