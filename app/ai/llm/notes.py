@@ -2,6 +2,7 @@ from app.ai.llm.prompts import LECTURE_NOTES_PROMPT
 from app.ai.llm.llm_client import llm_client
 from app.ai.llm.merge_notes import merge_notes
 import json
+from app.schemas.note import NoteContent
 
 
 def generate_notes(transcript: str) -> dict:
@@ -15,7 +16,7 @@ def generate_notes(transcript: str) -> dict:
             max_retries=3,
             base_delay=2.0
         )
-        return notes
+        return NoteContent.model_validate(notes).model_dump()
     except json.JSONDecodeError as e:
         print(f"[NOTES] JSON parsing failed: {e}")
         print(f"[NOTES] This may indicate the LLM returned malformed JSON")
@@ -46,8 +47,8 @@ def generate_notes_from_transcript(transcript: str, chunks: list[str]) -> dict:
             chunk_notes.append(notes)
         except Exception as e:
             print(f"[NOTES] Failed to generate notes for chunk {i+1}: {e}")
-            # Continue with other chunks even if one fails
-            chunk_notes.append({})
+            # Do not silently publish incomplete notes after a chunk fails.
+            raise
     
     print(f"[NOTES] Merging {len(chunk_notes)} chunk notes")
-    return merge_notes(chunk_notes)
+    return NoteContent.model_validate(merge_notes(chunk_notes)).model_dump()

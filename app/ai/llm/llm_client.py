@@ -19,19 +19,19 @@ class LLMClient:
         self.fallback_providers = fallback_providers or ["groq", "ollama"]
         
         # Initialize Groq client
-        self.groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        self.groq_client = Groq(api_key=os.getenv("GROQ_API_KEY")) if os.getenv("GROQ_API_KEY") else None
         
         # Initialize Gemini client
-        self.gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        self.gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY")) if os.getenv("GEMINI_API_KEY") else None
         
         # Initialize Ollama client
         self.ollama_client = OllamaClient(host='http://localhost:11434')
         
         # Model configurations
         self.models = {
-            "groq": "openai/gpt-oss-120b",
-            "gemini": "gemini-3.8-flash",
-            "ollama": "qwen3:8b"
+            "groq": os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"),
+            "gemini": os.getenv("GEMINI_MODEL", "gemini-3.8-flash"),
+            "ollama": os.getenv("OLLAMA_MODEL", "qwen3:8b")
         }
 
     def generate_content(
@@ -49,6 +49,10 @@ class LLMClient:
         print(f"[LLMClient] Starting generation with providers: {providers}")
         
         for provider in providers:
+            if provider == "groq" and self.groq_client is None:
+                continue
+            if provider == "gemini" and self.gemini_client is None:
+                continue
             model_name = self.models[provider]
             print(f"[LLMClient] Trying provider: {provider}, model: {model_name}")
             
@@ -82,6 +86,8 @@ class LLMClient:
 
     def _call_groq(self, prompt: str, model: str) -> dict:
         """Call Groq API"""
+        if self.groq_client is None:
+            raise RuntimeError("Groq is not configured")
         response = self.groq_client.chat.completions.create(
             model=model,
             messages=[
@@ -97,6 +103,8 @@ class LLMClient:
 
     def _call_gemini(self, prompt: str, model: str, response_mime_type: str) -> dict:
         """Call Gemini API"""
+        if self.gemini_client is None:
+            raise RuntimeError("Gemini is not configured")
         response = self.gemini_client.models.generate_content(
             model=model,
             contents=prompt,
@@ -123,4 +131,14 @@ class LLMClient:
 
 
 # Global client instance
-llm_client = LLMClient(primary_provider="gemini", fallback_providers=["groq", "ollama"])
+class LazyLLMClient:
+    """Do not require model credentials to start non-AI API routes."""
+    _client = None
+
+    def generate_content(self, *args, **kwargs):
+        if self._client is None:
+            self._client = LLMClient(primary_provider="gemini", fallback_providers=["groq", "ollama"])
+        return self._client.generate_content(*args, **kwargs)
+
+
+llm_client = LazyLLMClient()

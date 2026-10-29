@@ -50,14 +50,14 @@ def answer_question(
         db=db,
         query=query,
         course_id=course_id,
-        candidate_limit=20,
-        final_limit=10,
+        candidate_limit=10,
+        final_limit=5,
     )
 
     ranked = rerank(
         query=query,
         chunks=candidates,
-        top_k=5,
+        top_k=3,
     )
 
     if not ranked:

@@ -1,15 +1,14 @@
-from faster_whisper import WhisperModel
+from functools import lru_cache
 
 
 MODEL_SIZE = "base"
 
-model = WhisperModel(
-    MODEL_SIZE,
-    device="cpu",
-    compute_type="int8",
-)
+@lru_cache(maxsize=1)
+def get_model():
+    from faster_whisper import WhisperModel
+    return WhisperModel(MODEL_SIZE, device="cpu", compute_type="int8")
 def transcribe_audio(file_path: str) -> dict:
-    segments, info = model.transcribe(
+    segments, info = get_model().transcribe(
         file_path,
         beam_size=5,
     )

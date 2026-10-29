@@ -1,16 +1,24 @@
 
 from pathlib import Path
-from uuid import UUID
+from uuid import UUID, uuid4
 from datetime import datetime
 import json
+import re
 
-from pydantic import BaseModel
-from fastapi import APIRouter, Depends, File, Form, UploadFile
+from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.dependencies.database import get_db
 from app.services.lecture_service import LectureService
 from app.core.constants import LectureSourceType, LectureStatus
+from app.database.dependencies.auth import get_current_user
+from app.models.user import User
+from app.schemas.lecture import LectureResponse
+from app.services.course_service import CourseService
+from app.services.material_access import authorize_note
+from app.services.note_service import NoteService
+from app.core.constants import UserRole, NoteStatus
 
 from app.ai.pipeline.lecture_pipeline import process_lecture
 from app.ai.llm.notes import generate_notes_from_transcript
@@ -42,9 +50,9 @@ DEBUG_DIR.mkdir(exist_ok=True)
 
 class TranscriptRequest(BaseModel):
     course_id: UUID
-    transcript: str
-    filename: str = "transcript"
-    title: str | None = None
+    transcript: str = Field(min_length=1, max_length=2_000_000)
+    filename: str = Field(default="transcript", max_length=255)
+    title: str | None = Field(default=None, max_length=255)
 
 
 def run_syllabus_mapping(
@@ -114,11 +122,12 @@ def run_syllabus_mapping(
 
 
 @router.post("/upload")
-async def upload_lecture(
+def upload_lecture(
     course_id: UUID = Form(...),
-    title: str | None = Form(None),
+    title: str | None = Form(None, max_length=255),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Audio upload pipeline:
@@ -129,16 +138,29 @@ async def upload_lecture(
     5. Map notes against course syllabus
     6. Save mapping results and complete lecture
     """
+    CourseService(db).get_course(course_id, current_user)
     safe_filename = Path(file.filename or "lecture_audio").name
+    if Path(safe_filename).suffix.lower() not in {".wav", ".mp3", ".m4a", ".ogg", ".webm", ".mp4", ".flac"}:
+        file.file.close()
+        raise HTTPException(status_code=422, detail="Choose a supported audio file")
+    suffix = Path(safe_filename).suffix.lower()
+    stem = re.sub(r"[^a-zA-Z0-9._-]", "_", Path(safe_filename).stem)[:120] or "lecture"
+    safe_filename = f"{uuid4().hex}_{stem}{suffix}"
     file_path = UPLOAD_DIR / safe_filename
 
     lecture_service = LectureService(db)
     lecture = None
 
     try:
+        size = 0
         with file_path.open("wb") as buffer:
-            while chunk := await file.read(1024 * 1024):
+            while chunk := file.file.read(1024 * 1024):
+                size += len(chunk)
+                if size > 250 * 1024 * 1024:
+                    raise HTTPException(status_code=413, detail="Audio must be smaller than 250 MB")
                 buffer.write(chunk)
+        if size == 0:
+            raise HTTPException(status_code=422, detail="The audio file is empty")
 
         lecture_title = title or Path(safe_filename).stem
 
@@ -206,13 +228,14 @@ async def upload_lecture(
         raise
 
     finally:
-        await file.close()
+        file.file.close()
 
 
 @router.post("/transcript")
-async def process_transcript(
+def process_transcript(
     request: TranscriptRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Direct transcript pipeline:
@@ -222,8 +245,11 @@ async def process_transcript(
     4. Map notes against the course syllabus
     5. Persist mapping results
     """
-    safe_filename = Path(request.filename).stem or "transcript"
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    CourseService(db).get_course(request.course_id, current_user)
+    if not request.transcript.strip():
+        raise HTTPException(status_code=422, detail="Transcript cannot be blank")
+    safe_filename = re.sub(r"[^a-zA-Z0-9._-]", "_", Path(request.filename).stem)[:120] or "transcript"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + uuid4().hex
 
     session_dir = DEBUG_DIR / f"{safe_filename}_{timestamp}"
     session_dir.mkdir(parents=True, exist_ok=True)
@@ -321,3 +347,28 @@ async def process_transcript(
                 db.rollback()
 
         raise
+
+
+@router.get("/", response_model=list[LectureResponse])
+def list_lectures(
+    course_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    CourseService(db).get_course_for_user(course_id, current_user)
+    lectures = LectureService(db).get_course_lectures(course_id)
+    return [lecture for lecture in lectures if current_user.role == UserRole.TEACHER
+            or (lecture.note and lecture.note.status == NoteStatus.APPROVED)]
+
+
+@router.get("/{lecture_id}/transcript")
+def get_transcript(
+    lecture_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    note = authorize_note(db, current_user, NoteService(db).get_lecture_note(lecture_id))
+    transcript = note.lecture.transcript
+    if transcript is None:
+        raise HTTPException(status_code=404, detail="Transcript not found")
+    return {"lecture_id": lecture_id, "content": transcript.content, "language": transcript.language}

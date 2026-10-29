@@ -1,10 +1,12 @@
 from pathlib import Path
 from typing import Dict
+from app.ai.export.text import escape_note_text
 
 
 def render_html(notes: Dict, output_path: str) -> str:
     """Render notes JSON to a self-contained interactive HTML file."""
     
+    notes = escape_note_text(notes)
     html_template = """<!DOCTYPE html>
 <html lang="en">
 <head>

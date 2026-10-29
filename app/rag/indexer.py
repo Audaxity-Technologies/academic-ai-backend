@@ -5,12 +5,14 @@ from app.models.lecture import Lecture
 from app.models.note import Note
 from app.models.rag_chunk import RAGChunk
 from app.models.transcript import Transcript
+from app.core.constants import NoteStatus
 
 from app.rag.chunker import (
     build_note_chunks,
     build_transcript_chunks,
 )
 from app.rag.embeddings import embed_documents
+from app.rag.retriever import _invalidate_bm25_cache
 
 
 def index_course(
@@ -45,7 +47,8 @@ def index_course(
             )
         )
 
-        if note:
+        # Course search is shared with students: never index unpublished material.
+        if note and note.status == NoteStatus.APPROVED:
             all_chunks.extend(
                 build_note_chunks(
                     note=note,
@@ -102,5 +105,8 @@ def index_course(
         )
 
     db.commit()
+
+    # Invalidate BM25 cache for this course
+    _invalidate_bm25_cache(course_id)
 
     return len(all_chunks)

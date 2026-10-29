@@ -1,4 +1,5 @@
 from pathlib import Path
+from app.ai.export.text import escape_note_text
 
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
@@ -13,6 +14,7 @@ from reportlab.platypus import (
 
 
 def generate_pdf(notes: dict, output_path: str) -> str:
+    notes = escape_note_text(notes)
 
     output_file = Path(output_path)
     output_file.parent.mkdir(parents=True, exist_ok=True)

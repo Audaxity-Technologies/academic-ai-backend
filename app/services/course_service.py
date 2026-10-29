@@ -22,6 +22,8 @@ class CourseService:
         data: CourseCreate,
         teacher: User,
     ) -> Course:
+        if teacher.role != UserRole.TEACHER:
+            raise HTTPException(status_code=403, detail="Only teachers can create courses")
         existing_course = self.repo.get_by_code(data.code)
 
         if existing_course:
@@ -57,7 +59,7 @@ class CourseService:
                 detail="Course not found",
             )
 
-        if course.teacher_id != teacher.id:
+        if teacher.role != UserRole.TEACHER or course.teacher_id != teacher.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this course",
