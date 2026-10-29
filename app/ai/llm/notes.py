@@ -47,8 +47,9 @@ def generate_notes_from_transcript(transcript: str, chunks: list[str]) -> dict:
             chunk_notes.append(notes)
         except Exception as e:
             print(f"[NOTES] Failed to generate notes for chunk {i+1}: {e}")
-            # Do not silently publish incomplete notes after a chunk fails.
-            raise
-    
+            raise RuntimeError(
+                f"Notes generation failed for chunk {i+1}/{len(chunks)}. "
+                "Aborting to prevent incomplete lecture notes."
+            ) from e
     print(f"[NOTES] Merging {len(chunk_notes)} chunk notes")
     return NoteContent.model_validate(merge_notes(chunk_notes)).model_dump()

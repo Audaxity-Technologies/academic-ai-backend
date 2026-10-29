@@ -3,10 +3,9 @@ from pathlib import Path
 from uuid import UUID, uuid4
 from datetime import datetime
 import json
-import re
 
-from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException
+from pydantic import BaseModel
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
 
 from app.database.dependencies.database import get_db
@@ -138,16 +137,11 @@ def upload_lecture(
     5. Map notes against course syllabus
     6. Save mapping results and complete lecture
     """
-    CourseService(db).get_course(course_id, current_user)
-    safe_filename = Path(file.filename or "lecture_audio").name
-    if Path(safe_filename).suffix.lower() not in {".wav", ".mp3", ".m4a", ".ogg", ".webm", ".mp4", ".flac"}:
-        file.file.close()
-        raise HTTPException(status_code=422, detail="Choose a supported audio file")
-    suffix = Path(safe_filename).suffix.lower()
-    stem = re.sub(r"[^a-zA-Z0-9._-]", "_", Path(safe_filename).stem)[:120] or "lecture"
-    safe_filename = f"{uuid4().hex}_{stem}{suffix}"
-    file_path = UPLOAD_DIR / safe_filename
+    original_filename = Path(file.filename or "lecture_audio").name
+    extension = Path(original_filename).suffix.lower() or ".webm"
 
+    unique_filename = f"{uuid.uuid4().hex}{extension}"
+    file_path = UPLOAD_DIR / unique_filename
     lecture_service = LectureService(db)
     lecture = None
 
