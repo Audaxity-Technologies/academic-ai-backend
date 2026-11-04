@@ -1,5 +1,6 @@
 
 from pathlib import Path
+import uuid
 from uuid import UUID, uuid4
 from datetime import datetime
 import json
@@ -39,7 +40,7 @@ router = APIRouter(
 )
 
 UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
