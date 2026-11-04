@@ -7,6 +7,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 
+import os
+
 class Settings(BaseSettings):
     # Application
     APP_NAME: str = "Academic AI API"
@@ -14,12 +16,12 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # Database
-    DATABASE_URL: str
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./test.db")
 
-    CORS_ORIGINS: list[str] = ["*"]
+    CORS_ORIGINS: list[str] = ["*", "http://localhost:5173", "http://127.0.0.1:5173"]
 
     # Authentication
-    JWT_SECRET_KEY: str
+    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "change_me")
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
