@@ -1,0 +1,12 @@
+{
+  "pages_processed": 2,
+  "units": 8,
+  "topics": 91,
+  "subtopics": 0,
+  "empty_pages": [],
+  "ocr_pages": [],
+  "warnings": [
+    "Used native PDF text extraction. Review table layout and reading order."
+  ],
+  "needs_review": true
+}

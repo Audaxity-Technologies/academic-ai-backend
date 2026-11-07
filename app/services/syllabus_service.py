@@ -56,7 +56,7 @@ class SyllabusService:
             teacher=teacher,
         )
 
-        return self.repo.get_by_course(course_id)
+        return [topic for topic in self.repo.get_by_course(course_id) if topic.syllabus_document_id is None]
 
     def update_topic(
         self,
@@ -73,7 +73,7 @@ class SyllabusService:
 
         topic = self.repo.get_by_id(topic_id)
 
-        if topic is None or topic.course_id != course_id:
+        if topic is None or topic.course_id != course_id or topic.syllabus_document_id is not None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Syllabus topic not found",
@@ -88,6 +88,7 @@ class SyllabusService:
         if data.position is not None:
             topic.position = data.position
 
+        topic.embedding = None
         self.repo.update(topic)
 
         self.db.commit()
@@ -109,7 +110,7 @@ class SyllabusService:
 
         topic = self.repo.get_by_id(topic_id)
 
-        if topic is None or topic.course_id != course_id:
+        if topic is None or topic.course_id != course_id or topic.syllabus_document_id is not None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Syllabus topic not found",

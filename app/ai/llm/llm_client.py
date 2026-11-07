@@ -39,7 +39,9 @@ class LLMClient:
         prompt: str,
         response_mime_type: str = "application/json",
         max_retries: int = 3,
-        base_delay: float = 2.0
+        base_delay: float = 2.0,
+        request_timeout: float | None = None,
+        groq_completion_limit: int | None = None,
     ) -> dict:
         """
         Generate content using primary provider with fallback to secondary.
@@ -61,11 +63,11 @@ class LLMClient:
                     print(f"[LLMClient] Attempt {attempt + 1}/{max_retries} for {provider}")
                     
                     if provider == "groq":
-                        response = self._call_groq(prompt, model_name)
+                        response = self._call_groq(prompt, model_name, request_timeout, groq_completion_limit)
                     elif provider == "ollama":
-                        response = self._call_ollama(prompt, model_name)
+                        response = self._call_ollama(prompt, model_name, request_timeout)
                     else:
-                        response = self._call_gemini(prompt, model_name, response_mime_type)
+                        response = self._call_gemini(prompt, model_name, response_mime_type, request_timeout)
                     
                     print(f"[LLMClient] Success with {provider}!")
                     return response
@@ -84,40 +86,63 @@ class LLMClient:
         print(f"[LLMClient] All providers failed!")
         raise Exception(f"All providers failed after {max_retries} attempts each")
 
-    def _call_groq(self, prompt: str, model: str) -> dict:
+    def _call_groq(
+        self, prompt: str, model: str, timeout: float | None = None,
+        completion_limit: int | None = None,
+    ) -> dict:
         """Call Groq API"""
         if self.groq_client is None:
             raise RuntimeError("Groq is not configured")
-        response = self.groq_client.chat.completions.create(
+        client = self.groq_client
+        if timeout is not None:
+            client = client.with_options(timeout=timeout, max_retries=0)
+        completion_options = {}
+        if completion_limit is not None:
+            completion_options["max_completion_tokens"] = completion_limit
+            if model.startswith("openai/gpt-oss-"):
+                completion_options["reasoning_effort"] = "low"
+        response = client.chat.completions.create(
             model=model,
             messages=[
                 {"role": "system", "content": "You are a helpful assistant. Return ONLY valid JSON."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.1,
-            response_format={"type": "json_object"}
+            response_format={"type": "json_object"},
+            **completion_options,
         )
         
         content = response.choices[0].message.content
         return json.loads(content)
 
-    def _call_gemini(self, prompt: str, model: str, response_mime_type: str) -> dict:
+    def _call_gemini(
+        self, prompt: str, model: str, response_mime_type: str, timeout: float | None = None
+    ) -> dict:
         """Call Gemini API"""
         if self.gemini_client is None:
             raise RuntimeError("Gemini is not configured")
+        http_options = None
+        if timeout is not None:
+            http_options = types.HttpOptions(
+                timeout=int(timeout * 1000), retry_options=types.HttpRetryOptions(attempts=1),
+            )
         response = self.gemini_client.models.generate_content(
             model=model,
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type=response_mime_type,
+                http_options=http_options,
             ),
         )
         
         return json.loads(response.text)
 
-    def _call_ollama(self, prompt: str, model: str) -> dict:
+    def _call_ollama(self, prompt: str, model: str, timeout: float | None = None) -> dict:
         """Call Ollama API"""
-        response = self.ollama_client.chat(
+        client = self.ollama_client
+        if timeout is not None:
+            client = OllamaClient(host="http://localhost:11434", timeout=timeout)
+        response = client.chat(
             model=model,
             messages=[
                 {"role": "system", "content": "You are a helpful assistant. Return ONLY valid JSON."},

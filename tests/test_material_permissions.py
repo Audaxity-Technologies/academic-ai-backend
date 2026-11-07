@@ -5,7 +5,8 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 from uuid import uuid4
 
-os.environ["DATABASE_URL"] = "postgresql+psycopg://test:test@localhost/audaxity_test_unused"
+if os.getenv("AUDAXITY_DATABASE_INTEGRATION") != "1":
+    os.environ.setdefault("DATABASE_URL", "postgresql+psycopg://test:test@localhost/audaxity_test_unused")
 os.environ["JWT_SECRET_KEY"] = "audaxity-test-only-not-a-real-secret"
 
 import pytest
@@ -14,6 +15,8 @@ from fastapi.testclient import TestClient
 from app.api.v1.notes import router as notes
 from app.api.v1.lectures import router as lectures
 from app.api.v1.auth import router as auth
+from app.api.v1.syllabus import coverage
+from app.api.v1.syllabus.router import course_router as syllabus_courses, router as syllabus_router
 from app.core.constants import NoteStatus, UserRole
 from app.database.dependencies.auth import get_current_user
 from app.database.dependencies.database import get_db
@@ -24,7 +27,7 @@ from app.schemas.course import CourseCreate
 @pytest.fixture
 def environment(monkeypatch, tmp_path):
     app = FastAPI()
-    for router in [notes.router, lectures.router, auth.router]:
+    for router in [notes.router, lectures.router, auth.router, syllabus_router, syllabus_courses, coverage.router]:
         app.include_router(router, prefix="/api/v1")
     db = Mock()
     user = SimpleNamespace(id=uuid4(), role=UserRole.TEACHER)
@@ -148,7 +151,7 @@ def test_transcript_processing_persists_verified_contract(environment, monkeypat
     monkeypatch.setattr(lectures, "generate_notes_from_transcript", lambda *args: e.content)
     monkeypatch.setattr(lectures, "generate_pdf", lambda *args: None)
     monkeypatch.setattr(lectures, "render_html", lambda *args: None)
-    monkeypatch.setattr(lectures, "run_syllabus_mapping", lambda **kw: {"mappings": [], "coverage_percentage": 0})
+    monkeypatch.setattr(lectures, "run_lecture_alignment", lambda lecture_id: None)
     lecture = SimpleNamespace(id=uuid4())
     service = Mock()
     service.create_lecture.return_value = lecture
@@ -201,7 +204,7 @@ def test_audio_pipeline_saves_transcript_and_notes(environment, monkeypatch, tmp
     folder = tmp_path / "uploads"; folder.mkdir()
     monkeypatch.setattr(lectures, "UPLOAD_DIR", folder)
     monkeypatch.setattr(lectures, "process_lecture", lambda path: {"transcript": "Original spoken lecture", "notes": e.content, "pdf": "outputs/test.pdf", "html": "outputs/test.html", "debug_folder": "debug_outputs/test"})
-    monkeypatch.setattr(lectures, "run_syllabus_mapping", lambda **kwargs: {"mappings": [], "coverage_percentage": 0})
+    monkeypatch.setattr(lectures, "run_lecture_alignment", lambda lecture_id: None)
     service = Mock(); lecture = SimpleNamespace(id=uuid4()); service.create_lecture.return_value = lecture
     monkeypatch.setattr(lectures, "LectureService", lambda db: service)
     response = e.client.post("/api/v1/lectures/upload", data={"course_id": str(e.course.id), "title": "Test lecture"}, files={"file": ("lecture.wav", b"test audio", "audio/wav")})
@@ -220,3 +223,30 @@ def test_upload_rejects_invalid_type_and_blank_transcript(environment):
     assert e.client.post("/api/v1/lectures/upload", data={"course_id": str(e.course.id)}, files={"file": ("lecture.exe", b"test")}).status_code == 422
     assert e.client.post("/api/v1/lectures/transcript", json={"course_id": str(e.course.id), "transcript": "   "}).status_code == 422
     e.db.commit.assert_not_called()
+
+
+def test_syllabus_drafts_and_writes_are_owner_only(environment):
+    e = environment
+    document_id = uuid4()
+    e.db.get.return_value = SimpleNamespace(course_id=e.course.id, confirmed_at=None)
+    e.user.role = UserRole.STUDENT
+    file = {"file": ("sample.txt", b"Unit I: Transactions")}
+    assert e.client.post(f"/api/v1/courses/{e.course.id}/syllabus/upload", files=file).status_code == 403
+    assert e.client.get(f"/api/v1/syllabus/{document_id}/preview").status_code == 403
+    assert e.client.post(f"/api/v1/syllabus/{document_id}/confirm").status_code == 403
+    assert e.client.get(f"/api/v1/lectures/{e.note.lecture_id}/syllabus-mapping").status_code == 404
+    e.note.status = NoteStatus.APPROVED
+    assert e.client.post(f"/api/v1/lectures/{e.note.lecture_id}/syllabus-mapping/retry").status_code == 403
+
+
+def test_owner_can_queue_alignment_retry(environment, monkeypatch):
+    e = environment
+    e.note.lecture.id = e.note.lecture_id
+    e.note.lecture.alignment_status = "failed"
+    queued = Mock()
+    monkeypatch.setattr(coverage, "run_lecture_alignment", queued)
+    response = e.client.post(f"/api/v1/lectures/{e.note.lecture_id}/syllabus-mapping/retry")
+    assert response.status_code == 202
+    assert e.note.lecture.alignment_status == "pending"
+    e.db.commit.assert_called_once()
+    queued.assert_called_once_with(e.note.lecture_id)

@@ -35,7 +35,8 @@ def test_teacher_to_student_workflow_in_rolled_back_transaction(monkeypatch, tmp
     monkeypatch.setattr(processing, "OUTPUT_DIR", output)
     monkeypatch.setattr(processing, "DEBUG_DIR", debug)
     monkeypatch.setattr(processing, "generate_notes_from_transcript", lambda *args: notes)
-    # No syllabus topics are created, so no syllabus model request is needed.
+    # The request transaction is rolled back, so its lecture is not visible to the background session.
+    monkeypatch.setattr(processing, "run_lecture_alignment", lambda lecture_id: None)
     vector = [1.0] + [0.0] * 383
     monkeypatch.setattr(indexer, "embed_documents", lambda texts: [vector for _ in texts])
     monkeypatch.setattr(retriever, "embed_query", lambda text: vector)

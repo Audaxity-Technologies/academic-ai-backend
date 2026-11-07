@@ -48,13 +48,15 @@ def index_course(
         )
 
         # Course search is shared with students: never index unpublished material.
-        if note and note.status == NoteStatus.APPROVED:
-            all_chunks.extend(
-                build_note_chunks(
-                    note=note,
-                    lecture=lecture,
-                )
+        if not note or note.status != NoteStatus.APPROVED:
+            continue
+
+        all_chunks.extend(
+            build_note_chunks(
+                note=note,
+                lecture=lecture,
             )
+        )
 
         transcript = db.scalar(
             select(Transcript).where(

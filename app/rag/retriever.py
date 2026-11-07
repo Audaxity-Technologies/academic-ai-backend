@@ -25,7 +25,7 @@ def _get_bm25_index(course_id: int) -> tuple[list[RAGChunk], "BM25Okapi"]:
     Cache BM25 index per course_id to avoid rebuilding on every search.
     Cache key is course_id (int).
     """
-    from app.database.database import SessionLocal
+    from app.database.session import SessionLocal
 
     db = SessionLocal()
     try:

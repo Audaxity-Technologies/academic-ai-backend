@@ -8,10 +8,17 @@ from app.models.note import Note
 from app.models.syllabus_mapping import SyllabusMapping
 from app.models.rag_chunk import RAGChunk
 
+from app.models.syllabus_document import SyllabusDocument
+from app.models.syllabus_unit import SyllabusUnit
+from app.models.syllabus_subtopic import SyllabusSubtopic
+
 __all__ = [
     "User",
     "Course",
     "SyllabusTopic",
+    "SyllabusDocument",
+    "SyllabusUnit",
+    "SyllabusSubtopic",
     "Lecture",
     "Transcript",
     "Note",

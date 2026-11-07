@@ -7,7 +7,7 @@ import json
 import re
 
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, UploadFile, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.dependencies.database import get_db
@@ -26,12 +26,7 @@ from app.ai.llm.notes import generate_notes_from_transcript
 from app.ai.pipeline.chunking import chunk_transcript
 from app.ai.export.pdf_generator import generate_pdf
 from app.ai.export.html_renderer import render_html
-from app.ai.pipeline.syllabus_mapping import process_syllabus_mapping
-
-from app.repositories.syllabus_repository import SyllabusRepository
-from app.repositories.syllabus_mapping_repository import (
-    SyllabusMappingRepository,
-)
+from app.services.syllabus_alignment_service import run_lecture_alignment
 
 
 router = APIRouter(
@@ -56,74 +51,9 @@ class TranscriptRequest(BaseModel):
     title: str | None = Field(default=None, max_length=255)
 
 
-def run_syllabus_mapping(
-    db: Session,
-    lecture_id: UUID,
-    course_id: UUID,
-    lecture_notes: dict,
-) -> dict:
-    """
-    Fetch course syllabus topics, run AI mapping,
-    and persist the results for this lecture.
-    """
-    syllabus_repository = SyllabusRepository(db)
-    topics = syllabus_repository.get_by_course(course_id)
-
-    if not topics:
-        print(
-            f"[SYLLABUS] No syllabus topics found for course {course_id}"
-        )
-        return {
-            "mappings": [],
-            "coverage_percentage": 0.0,
-            "message": "No syllabus topics configured for this course.",
-        }
-
-    # Map topic titles to their database UUIDs.
-    topic_records = {
-        topic.title: topic.id
-        for topic in topics
-    }
-
-    result = process_syllabus_mapping(
-        syllabus_topics=[topic.title for topic in topics],
-        lecture_notes=lecture_notes,
-    )
-
-    # Validate that each returned topic belongs to this course.
-    expected_titles = set(topic_records)
-    returned_titles = [
-        item["syllabus_topic"]
-        for item in result["mappings"]
-    ]
-
-    if (
-        len(returned_titles) != len(expected_titles)
-        or set(returned_titles) != expected_titles
-    ):
-        raise ValueError(
-            "Syllabus mapper did not return exactly one result "
-            "for every syllabus topic."
-        )
-
-    mapping_repository = SyllabusMappingRepository(db)
-
-    mapping_repository.save_mappings(
-        lecture_id=lecture_id,
-        topic_records=topic_records,
-        mappings=result["mappings"],
-    )
-
-    print(
-        f"[SYLLABUS] Mapping completed for lecture {lecture_id}: "
-        f"{result['coverage_percentage']}%"
-    )
-
-    return result
-
-
 @router.post("/upload")
 def upload_lecture(
+    background_tasks: BackgroundTasks,
     course_id: UUID = Form(...),
     title: str | None = Form(None, max_length=255),
     file: UploadFile = File(...),
@@ -182,6 +112,7 @@ def upload_lecture(
             lecture=lecture,
             content=result["transcript"],
             language=result.get("language"),
+            segments=result.get("segments"),
             transcript_path=str(
                 DEBUG_DIR
                 / Path(result["debug_folder"]).name
@@ -197,18 +128,12 @@ def upload_lecture(
             html_path=result["html"],
         )
 
-        # Syllabus mapping happens after notes are generated.
-        mapping_result = run_syllabus_mapping(
-            db=db,
-            lecture_id=lecture.id,
-            course_id=course_id,
-            lecture_notes=result["notes"],
-        )
-
         lecture.debug_path = result["debug_folder"]
+        lecture.alignment_status = "pending"
         lecture_service.mark_completed(lecture)
 
         db.commit()
+        background_tasks.add_task(run_lecture_alignment, lecture.id)
 
         return {
             "lecture_id": str(lecture.id),
@@ -217,7 +142,10 @@ def upload_lecture(
             "notes": result["notes"],
             "pdf": result["pdf"],
             "html": result["html"],
-            "syllabus_mapping": mapping_result,
+            "syllabus_mapping": {
+                "status": "pending", "mappings": [], "coverage_percentage": 0.0,
+                "message": "Syllabus alignment is queued.",
+            },
         }
 
     except Exception:
@@ -239,6 +167,7 @@ def upload_lecture(
 @router.post("/transcript")
 def process_transcript(
     request: TranscriptRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -317,17 +246,12 @@ def process_transcript(
             html_path=str(html_path),
         )
 
-        mapping_result = run_syllabus_mapping(
-            db=db,
-            lecture_id=lecture.id,
-            course_id=request.course_id,
-            lecture_notes=final_notes,
-        )
-
         lecture.debug_path = str(session_dir)
+        lecture.alignment_status = "pending"
         lecture_service.mark_completed(lecture)
 
         db.commit()
+        background_tasks.add_task(run_lecture_alignment, lecture.id)
 
         return {
             "lecture_id": str(lecture.id),
@@ -338,7 +262,10 @@ def process_transcript(
             "pdf": str(pdf_path),
             "html": str(html_path),
             "debug_folder": str(session_dir),
-            "syllabus_mapping": mapping_result,
+            "syllabus_mapping": {
+                "status": "pending", "mappings": [], "coverage_percentage": 0.0,
+                "message": "Syllabus alignment is queued.",
+            },
         }
 
     except Exception:

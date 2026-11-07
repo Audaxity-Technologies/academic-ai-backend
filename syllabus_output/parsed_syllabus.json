@@ -1,0 +1,926 @@
+{
+  "subject_name": "NoSQL Databases",
+  "course_code": "BCSE406L",
+  "references": [
+    "Adam Fowler, NoSQL For Dummies, For Dummies, 1st edition, 2015",
+    "Gerardus Blokdyk, NoSQL Databases A Complete Guide, 5STARCooks, 2021",
+    "Pramod J. Sadalage and Martin Fowler, NoSQL Distilled, Addison-Wesley, 1st edition, 2012",
+    "Guy Harrison, “Next Generation database: NoSQL New SQL and Big Data”, Apress, 1st Edition, 2015."
+  ],
+  "learning_outcomes": [
+    "Define, compare and use the four types of NoSQL Databases.",
+    "Explain key value databases and apply queries on those databases.",
+    "Explain the detailed architecture, define objects, load data, query data and performance tune Document-oriented NoSQL databases.",
+    "Demonstrate an understanding of the detailed architecture, define objects, load data, query data and performance tune Column-oriented and Graph oriented NoSQL databases.",
+    "Evaluate NoSQL database development tools and programming languages."
+  ],
+  "assessment": [
+    "CAT",
+    "written assignment",
+    "Quiz",
+    "FAT"
+  ],
+  "units": [
+    {
+      "title": "Introduction",
+      "number": "1",
+      "description": null,
+      "pages": [
+        1
+      ],
+      "topics": [
+        {
+          "title": "The Relational Database Revolution with SQL",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Design Limitations",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Impedance Mismatch",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Schema Evolution",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Horizontal Scalability",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Motivations for Not Just/No SQL (NoSQL) Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Data Management with Distributed Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "SQL Versus NoSQL Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "The CAP Theorem",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "ACID and BASE",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Types of Eventual Consistency",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Types of NoSQL Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        }
+      ]
+    },
+    {
+      "title": "Key-Value Databases",
+      "number": "2",
+      "description": null,
+      "pages": [
+        1
+      ],
+      "topics": [
+        {
+          "title": "From Arrays to Key-Value Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Essential Features of Key-Value Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Properties of keys",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Characteristics of values",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Data Modeling Terms for Key-Value Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Key - Architecture and Implementation terms",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Designing Structured Values",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Limitations of Key-Value Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Design Patterns for Key-Value Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Redis database",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Queries",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Case Study: Key-Value Databases for Mobile Application Configuration",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        }
+      ]
+    },
+    {
+      "title": "Document Databases",
+      "number": "3",
+      "description": null,
+      "pages": [
+        1
+      ],
+      "topics": [
+        {
+          "title": "Introduction to Document Databases – Mongo DB",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Collections",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Basic operations on collections (CRUD)",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Find operation",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Sorting",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Limiting",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Aggregate operations: Aggregation pipeline",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Operators",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Combining aggregate operators",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        }
+      ]
+    },
+    {
+      "title": "Designing Document Databases",
+      "number": "4",
+      "description": null,
+      "pages": [
+        1
+      ],
+      "topics": [
+        {
+          "title": "Partitioning",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Types of Partitions",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Vertical Partitioning",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Horizontal Partitioning or Sharding",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Separating Data with Shard Keys",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Replication",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Distributing Data with a Partitioning Algorithm",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Data Modelling and Query Processing",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Normalization – De-Normalization",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Query Processor",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Indexing",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Distributed Consistency",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Joins",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        }
+      ]
+    },
+    {
+      "title": "Column Family Databases",
+      "number": "5",
+      "description": null,
+      "pages": [
+        1
+      ],
+      "topics": [
+        {
+          "title": "Introduction to Column Family Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Google Big Table",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Differences and Similarities to Key-Value and Document Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Architectures Used in Column Family Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Cassandra Architecture: Peer-to-Peer",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Commit Log",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Bloom Filter",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Consistency Level",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Processes and Protocols",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Replication",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Anti-Entropy",
+          "number": null,
+          "description": null,
+          "pages": [
+            1
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Gossip Protocol",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Hinted Handoff",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Handling of deletion",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "When to Use Column Family",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        }
+      ]
+    },
+    {
+      "title": "Designing Column Family Databases",
+      "number": "6",
+      "description": null,
+      "pages": [
+        2
+      ],
+      "topics": [
+        {
+          "title": "Column Family Database Terminology – Key space",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Row Key",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Column",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Column Families – Cassandra",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "CQL Queries",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Primary Key and Clustering Key",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "CRUD operations",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Cluster",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Partition",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Replication",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Consistency levels",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Guidelines for Designing Tables",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Indexing",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Primary and Secondary Index",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        }
+      ]
+    },
+    {
+      "title": "Graph Databases",
+      "number": "7",
+      "description": null,
+      "pages": [
+        2
+      ],
+      "topics": [
+        {
+          "title": "Introduction to Graph Databases",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "What Is a Graph?",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Graphs and Network Modeling",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Advantages of Graph Database",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Elements of Graphs",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Operations on Graphs",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Properties of Graphs and Nodes",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Types of Graphs",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Graph Design",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Neo4J",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Cypher Query Language: Creating, Removing and Querying Nodes and Relations",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Basic Graph Traversal",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Finding Path and Distance between nodes",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Gremlin: Query by Graph Traversal",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        },
+        {
+          "title": "Using NoSQL and Relational Databases Together",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        }
+      ]
+    },
+    {
+      "title": "Recent Trends",
+      "number": "8",
+      "description": null,
+      "pages": [
+        2
+      ],
+      "topics": [
+        {
+          "title": "Guest lectures from Industry and, Research and Development Organizations",
+          "number": null,
+          "description": null,
+          "pages": [
+            2
+          ],
+          "subtopics": []
+        }
+      ]
+    }
+  ],
+  "needs_review": false,
+  "review_reason": null
+}

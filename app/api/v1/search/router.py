@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -12,6 +13,8 @@ from app.rag.service import answer_question
 from app.schemas.search import IndexResponse, RAGResponse
 from app.services.course_service import CourseService
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/search",
@@ -84,6 +87,7 @@ def search_knowledge(
             course_id=course_id,
         )
     except Exception:
+        logger.exception("Course search failed for %s", course_id)
         raise HTTPException(
             status_code=500,
             detail="RAG search failed. Please try again later.",

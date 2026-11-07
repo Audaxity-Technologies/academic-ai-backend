@@ -103,6 +103,11 @@ class Course(Base):
         back_populates="course",
         cascade="all, delete-orphan",
     )
+    syllabus_documents = relationship(
+        "SyllabusDocument",
+        back_populates="course",
+        cascade="all, delete-orphan",
+    )
     lectures = relationship(
         "Lecture",
         back_populates="course",

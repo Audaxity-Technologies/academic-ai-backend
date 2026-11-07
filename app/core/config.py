@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,6 +20,9 @@ class Settings(BaseSettings):
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./test.db")
 
     CORS_ORIGINS: list[str] = ["*", "http://localhost:5173", "http://127.0.0.1:5173"]
+
+    SYLLABUS_TOP_K: int = Field(default=10, ge=1, le=40)
+    SYLLABUS_CHUNK_SIZE: int = Field(default=1800, ge=200, le=6000)
 
     # Authentication
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "change_me")

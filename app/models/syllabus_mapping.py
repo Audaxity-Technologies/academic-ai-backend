@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Float, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Float, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -10,6 +10,9 @@ from app.database.base import Base
 
 class SyllabusMapping(Base):
     __tablename__ = "syllabus_mappings"
+    __table_args__ = (
+        UniqueConstraint('lecture_id', 'syllabus_topic_id', name='uq_syllabus_mappings_lecture_topic'),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -40,6 +43,9 @@ class SyllabusMapping(Base):
         Float,
         nullable=False,
     )
+
+    explanation: Mapped[str | None] = mapped_column(Text)
+    needs_review: Mapped[bool] = mapped_column(Boolean, default=False)
 
     evidence: Mapped[list] = mapped_column(
         JSONB,

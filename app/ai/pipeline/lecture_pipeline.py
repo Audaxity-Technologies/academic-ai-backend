@@ -20,20 +20,26 @@ def process_lecture(file_path: str) -> dict:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     session_dir = DEBUG_DIR / f"{Path(file_path).stem}_{timestamp}"
     session_dir.mkdir(exist_ok=True)
-    
+
     print(f"[DEBUG] Session folder: {session_dir}")
-    
+
     transcription_result = transcribe_audio(file_path)
 
     transcript = transcription_result["transcript"]
-    
+    segments = transcription_result.get("segments", [])
+
     # Save full transcript
     transcript_path = session_dir / "01_full_transcript.txt"
     transcript_path.write_text(transcript, encoding="utf-8")
     print(f"[DEBUG] Saved transcript to {transcript_path}")
 
+    # Save segments with timestamps for evidence extraction
+    segments_path = session_dir / "01_segments.json"
+    segments_path.write_text(json.dumps(segments, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[DEBUG] Saved {len(segments)} segments to {segments_path}")
+
     chunks = chunk_transcript(transcript)
-    
+
     # Save chunks
     chunks_path = session_dir / "02_chunks.json"
     chunks_path.write_text(json.dumps(chunks, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -41,7 +47,7 @@ def process_lecture(file_path: str) -> dict:
 
     # Generate notes using the new chunk-aware function
     final_notes = generate_notes_from_transcript(transcript, chunks)
-    
+
     # Save final notes
     final_notes_path = session_dir / "04_final_notes.json"
     final_notes_path.write_text(json.dumps(final_notes, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -72,6 +78,7 @@ def process_lecture(file_path: str) -> dict:
     return {
         "transcript": transcript,
         "language": transcription_result.get("language"),
+        "segments": segments,
         "chunks": len(chunks),
         "notes": final_notes,
         "pdf": str(pdf_path),

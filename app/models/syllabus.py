@@ -2,7 +2,8 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
+from pgvector.sqlalchemy import Vector
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
@@ -24,6 +25,20 @@ class SyllabusTopic(Base):
         index=True,
     )
 
+    syllabus_document_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("syllabus_documents.id", ondelete="CASCADE"), index=True
+    )
+    syllabus_unit_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("syllabus_units.id", ondelete="CASCADE"), index=True
+    )
+    parent_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("syllabus_topics.id", ondelete="CASCADE"), index=True
+    )
+    unit = relationship("SyllabusUnit")
+    parent = relationship("SyllabusTopic", remote_side=[id])
+    number: Mapped[str | None] = mapped_column(String(80))
+    pages: Mapped[list | None] = mapped_column(JSONB)
+
     title: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
@@ -38,7 +53,13 @@ class SyllabusTopic(Base):
         Integer,
         nullable=False,
     )
-    
+
+    # Embedding for semantic retrieval (384-dimensional for bge-small-en-v1.5)
+    embedding: Mapped[list[float] | None] = mapped_column(
+        Vector(384),
+        nullable=True,
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

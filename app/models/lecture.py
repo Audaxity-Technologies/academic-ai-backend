@@ -84,6 +84,9 @@ class Lecture(Base):
         nullable=False,
     )
 
+    alignment_status: Mapped[str | None] = mapped_column(String(30))
+    alignment_error: Mapped[str | None] = mapped_column(String(255))
+
     course = relationship(
         "Course",
         back_populates="lectures",

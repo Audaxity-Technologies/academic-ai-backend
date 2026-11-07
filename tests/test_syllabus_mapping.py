@@ -67,13 +67,11 @@ lecture_notes = {
         "The lecture discusses atomicity and consistency."
     )
 }
-result = process_syllabus_mapping(
-    syllabus_topics=syllabus_topics,
-    lecture_notes=lecture_notes
-)
+def test_legacy_notes_mapper_demo_is_isolated(monkeypatch):
+    from app.ai.pipeline import syllabus_mapping
 
-print("\n===== SYLLABUS MAPPING RESULT =====\n")
-print(result)
-
-print("\n===== SYLLABUS COVERAGE =====")
-print(f"{result['coverage_percentage']}%")
+    monkeypatch.setattr(syllabus_mapping, "map_syllabus", lambda *args, **kwargs: {
+        "mappings": [],
+    })
+    result = process_syllabus_mapping(syllabus_topics=syllabus_topics, lecture_notes=lecture_notes)
+    assert result == {"mappings": [], "coverage_percentage": 0.0}
