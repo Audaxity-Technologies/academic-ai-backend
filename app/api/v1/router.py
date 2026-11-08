@@ -14,9 +14,18 @@ from app.api.v1.search.router import router as search_router
 from app.api.v1.analytics.router import router as analytics_router
 from app.api.v1.notifications.router import router as notifications_router
 from app.api.v1.syllabus.router import router as syllabus_router
+from app.api.v1.conversations.router import router as conversations_router
 
 from app.api.v1.syllabus.router import course_router as syllabus_course_router
 from app.api.v1.syllabus.coverage import router as syllabus_coverage_router
+
+from app.api.v1.practice_exams import router as practice_exams_router
+
+from app.api.v1.question_papers import router as question_papers_router
+
+from app.api.v1.flashcards import router as flashcards_router
+
+from app.api.v1.study_planner import router as study_planner_router
 
 api_router = APIRouter(
     prefix="/api/v1",
@@ -37,6 +46,14 @@ api_router.include_router(analytics_router)
 api_router.include_router(notifications_router)
 api_router.include_router(auth_router)
 api_router.include_router(syllabus_router)
+api_router.include_router(conversations_router)
 
 api_router.include_router(syllabus_course_router)
 api_router.include_router(syllabus_coverage_router)
+api_router.include_router(practice_exams_router)
+
+api_router.include_router(question_papers_router)
+
+api_router.include_router(flashcards_router)
+
+api_router.include_router(study_planner_router)
