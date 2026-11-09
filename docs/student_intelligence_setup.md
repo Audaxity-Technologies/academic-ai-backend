@@ -698,3 +698,12 @@ GET /api/v1/study-planner/goals lists private goals for course_id. POST to the s
 Open **My Progress** in a course and choose 7, 30, or 90 days. The dashboard reads saved practice attempts, flashcard reviews, and completed study sessions. Practice accuracy divides correct answers by answered questions. Unanswered questions appear separately. Flashcard recall reports ratings of three or higher among recorded reviews. Study minutes are the planned duration of sessions marked complete. These measures describe recorded activity.
 
 GET /api/v1/analytics/learning-progress accepts course_id, days, and timezone. Date buckets use the requested IANA time zone. The dashboard displays your private activity and uses the existing course syllabus coverage endpoint for lecture coverage. Past-paper totals describe uploaded papers and extracted questions, since that workspace does not yet score attempts.
+
+
+## Resource Library
+
+Open **Resource Library** in a course. Enter a title, author, or topic and choose a provider. The typed search goes to the selected external providers. Course notes, student records, and transcripts are outside this search.
+
+Crossref works with an empty provider configuration. Optionally set CROSSREF_MAILTO on the backend. To enable OpenAlex, set OPENALEX_API_KEY in the backend .env and restart the API. The .env.example lists both variables. There is no database migration for search.
+
+GET /api/v1/resources/search requires authentication and accepts q, optional provider (crossref or openalex), and limit per provider. The response includes normalized source metadata and a separate status for each provider. Matching DOIs are merged with their provider attribution preserved. Each adapter has a request timeout, a bounded retry, a rate-limit cooldown, and a 15-minute bounded in-process cache. Save and collection features are pending.

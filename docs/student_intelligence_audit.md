@@ -1003,3 +1003,6 @@ The handoff included the Phase 1.1 models, migration, repository, service, API r
 | 1.6 Learning Progress | Planned | Course-scoped practice accuracy, topic results, flashcard recall, completed study sessions, and reported syllabus coverage. Past-paper activity remains an inventory until scored practice exists. |
 
 The additive conversation and practice-exam migrations were applied to the configured localhost PostgreSQL database. Downgrade SQL was inspected offline and includes guards for saved data. The PostgreSQL workflow uses rollback transactions and mocked AI responses.
+
+
+Phase 2 has started with an authenticated Crossref and optional OpenAlex metadata search. The Resource Library shows provider status and source links. Additional providers, saving, and collections remain pending.

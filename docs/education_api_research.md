@@ -1202,3 +1202,12 @@ PROVIDER_RATE_LIMITS = {
 ---
 
 **Research Complete.** Ready for implementation planning.
+
+
+## First implementation slice
+
+Crossref public metadata search requires no key. Set CROSSREF_MAILTO to an operational contact if you want to use the polite pool. Crossref publishes separate public and polite request and concurrency limits. The integration requests titles, authors, dates, and DOIs. [Crossref REST API access and limits](https://www.crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication)
+
+OpenAlex search is opt-in in Minutes. Configure a server-side OPENALEX_API_KEY. OpenAlex documents anonymous access and a limited free allowance for registered accounts, with additional usage subject to its pricing and rate limits. This integration uses metadata search and can surface an OpenAlex-reported open-access link. [OpenAlex authentication](https://help.openalex.org/api/authentication/) · [OpenAlex pricing](https://help.openalex.org/access/pricing/)
+
+Neither adapter retrieves full text. No provider keys are sent to the browser. No abstracts are cached. arXiv and the remaining discovery providers are pending.

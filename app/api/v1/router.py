@@ -27,6 +27,8 @@ from app.api.v1.flashcards import router as flashcards_router
 
 from app.api.v1.study_planner import router as study_planner_router
 
+from app.api.v1.resources import router as resources_router
+
 api_router = APIRouter(
     prefix="/api/v1",
 )
@@ -57,3 +59,5 @@ api_router.include_router(question_papers_router)
 api_router.include_router(flashcards_router)
 
 api_router.include_router(study_planner_router)
+
+api_router.include_router(resources_router)
